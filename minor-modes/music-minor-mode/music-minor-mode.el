@@ -1,3 +1,5 @@
+;; music-minor-mode.el -*- lexical-binding: t; -*-
+
 (defun music-minor/music-eval-selection ()
   " Evaluate a selected region, or the entire buffer, in tidal OR SCLang "
   (interactive)
@@ -58,15 +60,7 @@
 (define-minor-mode music-minor-mode
   "A Minor mode for generalised SCLang/Tidal/Chuck commands"
   :lighter "Music"
+  :global t
   )
-
-(defun music-minor/music-on ()
-  (unless (minibufferp)
-    (if (or (eq major-mode 'tidal-mode ) (eq major-mode 'sclang-mode))
-        (music-minor-mode 1))
-    )
-  )
-
-(define-globalized-minor-mode global-music-mode music-minor-mode music-minor/music-on)
 
 (provide 'music-minor-mode)

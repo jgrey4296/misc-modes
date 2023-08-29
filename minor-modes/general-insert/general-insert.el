@@ -52,14 +52,6 @@
 
   )
 
-;;;###autoload
-(define-minor-mode general-insert-minor-mode
-  " "
-  :init-value nil
-  :lighter "general-insert"
-  (general-insert-build-cache)
-)
-
 (defun general-insert-default (x)
   (insert (car (split-string x "#" t " +")))
   )
@@ -112,5 +104,13 @@
     targets
     )
   )
+
+;;;###autoload
+(define-minor-mode general-insert-minor-mode
+  " "
+  :init-value nil
+  :lighter "general-insert"
+  (general-insert-build-cache)
+)
 
 (provide 'general-insert)
