@@ -1,3 +1,5 @@
+;; tag-charting.el -*- mode: Lisp; lexical-binding: t; -*-
+
 (defun tagging-minor-mode--split-temp-buffer-create (args)
   "Given a pair, create a temp buffer in the cdr directory,
 naming the directory based on the first line of text and insert the car "

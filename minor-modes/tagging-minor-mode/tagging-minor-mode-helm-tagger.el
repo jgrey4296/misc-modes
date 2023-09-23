@@ -7,13 +7,13 @@
 (require 'helm-files)
 (require 'tag-charting)
 
-(defvar tagging-minor-mode--helm-source)
-(defvar tagging-minor-mode--fallback-source)
-(defvar tagging-minor-mode--helm-buffer-name  "*Helm Tags*")
-(defvar tagging-minor-mode-re-entrant-quit-char "|")
+(defvar librarian-tagging-mode--helm-source)
+(defvar librarian-tagging-mode--fallback-source)
+(defvar librarian-tagging-mode--helm-buffer-name  "*Helm Tags*")
+(defvar librarian-tagging-mode-re-entrant-quit-char "|")
 
-(defvar tagging-minor-mode-candidate-counts '())
-(defvar tagging-minor-mode-candidate-names '())
+(defvar librarian-tagging-mode-candidate-counts '())
+(defvar librarian-tagging-mode-candidate-names '())
 
 (defun tagging-minor-mode--trim-input (x)
   (let ((trimmed (string-trim x)))
@@ -124,63 +124,63 @@
                                                                              candString)))
                                                `(,candString ,(cdr candidate)))) display-pairs))
                )
-          (setq tagging-minor-mode-candidate-counts global-tags)
-          (setq tagging-minor-mode-candidate-names (sort propertied-tags 'tagging-minor-mode--sort-candidates))
+          (setq librarian-tagging-mode-candidate-counts global-tags)
+          (setq librarian-tagging-mode-candidate-names (sort propertied-tags 'tagging-minor-mode--sort-candidates))
           )
       '()
       ))
   )
 
 (defun tagging-minor-mode-set-tags-re-entrant (x)
-  (unless (s-equals? (s-trim (car x)) tagging-minor-mode-re-entrant-quit-char)
+  (unless (s-equals? (s-trim (car x)) librarian-tagging-mode-re-entrant-quit-char)
     (tagging-minor-mode-set-tags x)
     (with-helm-buffer
       (setq-local helm-input-local " ")
       )
-    (helm-resume tagging-minor-mode--helm-buffer-name)
+    (helm-resume librarian-tagging-mode--helm-buffer-name)
     )
   )
 
 (defun tagging-minor-mode-set-new-tag-re-entrant (x)
-  (unless (s-equals? (s-trim x) tagging-minor-mode-re-entrant-quit-char)
+  (unless (s-equals? (s-trim x) librarian-tagging-mode-re-entrant-quit-char)
     (tagging-minor-mode-set-new-tag x)
     (with-helm-buffer
       (setq-local helm-input-local " ")
       )
-    (helm-resume tagging-minor-mode--helm-buffer-name)
+    (helm-resume librarian-tagging-mode--helm-buffer-name)
     )
   )
 
-(setq tagging-minor-mode--helm-source
+(setq librarian-tagging-mode--helm-source
       (helm-make-source "Helm Tagging" 'helm-source
         :action (helm-make-actions "Re-entrant-set" #'tagging-minor-mode-set-tags-re-entrant
                                    "Set"            #'tagging-minor-mode-set-tags)
         :pattern-transformer #'tagging-minor-mode--trim-input
         )
       )
-(setq tagging-minor-mode--fallback-source
+(setq librarian-tagging-mode--fallback-source
       (helm-build-dummy-source "Helm Tags Fallback Source"
         :action (helm-make-actions "Re-entrant-Create" #'tagging-minor-mode-set-new-tag-re-entrant
                                    "Create"            #'tagging-minor-mode-set-new-tag)
         :filtered-candidate-transformer (lambda (_c _s) (list helm-pattern)))
       )
 
-(evil-define-command tagging-minor-mode-tagger (&optional beg end type)
+(evil-define-command librarian-tagging-mode-tagger (&optional beg end type)
   " Opens the Tagging Helm "
   (interactive "<R>")
-  (unless tagging-minor-mode (user-error "Tagging Minor Mode not active"))
-  (set-marker tagging-minor-mode-marker end)
-  (get-buffer-create tagging-minor-mode--helm-buffer-name)
+  (unless librarian-tagging-mode (user-error "Tagging Minor Mode not active"))
+  (set-marker librarian-tagging-mode-marker end)
+  (get-buffer-create librarian-tagging-mode--helm-buffer-name)
 
   (save-excursion
     (goto-char beg)
     (let* ((current-tags (tagging-minor-mode-get-tags))
            (candidates   (tagging-minor-mode-candidates current-tags))
-           (main-source (cons `(candidates . ,candidates) tagging-minor-mode--helm-source))
+           (main-source (cons `(candidates . ,candidates) librarian-tagging-mode--helm-source))
            )
-      (helm :sources (list main-source tagging-minor-mode--fallback-source)
+      (helm :sources (list main-source librarian-tagging-mode--fallback-source)
             :input ""
-            :buffer tagging-minor-mode--helm-buffer-name
+            :buffer librarian-tagging-mode--helm-buffer-name
             )
       )
     )
