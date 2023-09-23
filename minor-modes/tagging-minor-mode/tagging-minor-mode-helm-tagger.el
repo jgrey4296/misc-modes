@@ -15,14 +15,14 @@
 (defvar librarian-tagging-mode-candidate-counts '())
 (defvar librarian-tagging-mode-candidate-names '())
 
-(defun tagging-minor-mode--trim-input (x)
+(defun librarian-tagging-mode--trim-input (x)
   (let ((trimmed (string-trim x)))
     (s-replace-regexp "\s+" "_" trimmed)
     )
   )
 
 (define-advice helm-grep--prepare-cmd-line (:override (only-files &optional include zgrep)
-                                            tagging-minor-mode-grep-helm-override)
+                                            librarian-tagging-mode-grep-helm-override)
   (let* ((default-directory (or helm-ff-default-directory
                                 (helm-default-directory)
                                 default-directory))
@@ -71,7 +71,7 @@
   )
 
 (define-advice helm-grep--pipe-command-for-grep-command (:override (smartcase pipe-switches &optional grep-cmd)
-                                                         tagging-minor-mode-helm-ggrep-fix)
+                                                         librarian-tagging-mode-helm-ggrep-fix)
   (pcase (or grep-cmd (helm-grep-command))
     ;; Use grep for GNU regexp based tools.
     ((or "grep" "zgrep" "git-grep")
@@ -84,36 +84,36 @@
      (format "%s --smart-case --color %s" ack pipe-switches)))
   )
 
-(defun tagging-minor-mode-insert-candidates (x)
+(defun librarian-tagging-mode-insert-candidates (x)
   "A Helm action to insert selected candidates into the current buffer "
   (let ((candidates (helm-marked-candidates)))
     (with-helm-current-buffer
       ;;Substring -2 to chop off separating marks
       (insert (mapconcat (lambda (x) (substring x 0 -2)) candidates "\n")))))
 
-(defun tagging-minor-mode--sort-candidates (ap bp)
+(defun librarian-tagging-mode--sort-candidates (ap bp)
   " Sort routine to sort by colour then lexicographically "
   (let* ((a (car ap))
          (b (car bp))
          (aprop (get-text-property 0 'font-lock-face a))
          (bprop (get-text-property 0 'font-lock-face b))
-         (lookup (lambda (x) (gethash (cadr x) tagging-minor-mode-global-tags))))
+         (lookup (lambda (x) (gethash (cadr x) librarian-tagging-mode-global-tags))))
     (cond
      ((and aprop bprop (> (funcall lookup ap) (funcall lookup bp))) t)
      ((and aprop (not bprop)) t)
      ((and (not aprop) (not bprop) (> (funcall lookup ap) (funcall lookup bp))))
      )))
 
-(defun tagging-minor-mode-candidates (current-tags)
+(defun librarian-tagging-mode-candidates (current-tags)
   " Given Candidates, colour them if they are assigned, then sort them  "
-  (let* ((global-tags tagging-minor-mode-global-tags))
+  (let* ((global-tags librarian-tagging-mode-global-tags))
     (if (not (hash-table-empty-p global-tags))
         (let* ((cand-keys (hash-table-keys global-tags))
                (cand-vals (hash-table-values global-tags))
                (cand-pairs (-zip-pair cand-keys cand-vals))
                (maxTagLength (apply 'max (mapcar 'length cand-keys)))
                (maxTagAmount (apply 'max cand-vals))
-               (bar-keys (tagging-minor-mode--make-bar-chart cand-pairs maxTagLength maxTagAmount))
+               (bar-keys (librarian-tagging-mode--make-bar-chart cand-pairs maxTagLength maxTagAmount))
                (display-pairs (-zip-pair bar-keys cand-keys))
                (propertied-tags (cl-map 'list (lambda (candidate)
                                              (let ((candString (car candidate)))
@@ -125,15 +125,15 @@
                                                `(,candString ,(cdr candidate)))) display-pairs))
                )
           (setq librarian-tagging-mode-candidate-counts global-tags)
-          (setq librarian-tagging-mode-candidate-names (sort propertied-tags 'tagging-minor-mode--sort-candidates))
+          (setq librarian-tagging-mode-candidate-names (sort propertied-tags 'librarian-tagging-mode--sort-candidates))
           )
       '()
       ))
   )
 
-(defun tagging-minor-mode-set-tags-re-entrant (x)
+(defun librarian-tagging-mode-set-tags-re-entrant (x)
   (unless (s-equals? (s-trim (car x)) librarian-tagging-mode-re-entrant-quit-char)
-    (tagging-minor-mode-set-tags x)
+    (librarian-tagging-mode-set-tags x)
     (with-helm-buffer
       (setq-local helm-input-local " ")
       )
@@ -141,9 +141,9 @@
     )
   )
 
-(defun tagging-minor-mode-set-new-tag-re-entrant (x)
+(defun librarian-tagging-mode-set-new-tag-re-entrant (x)
   (unless (s-equals? (s-trim x) librarian-tagging-mode-re-entrant-quit-char)
-    (tagging-minor-mode-set-new-tag x)
+    (librarian-tagging-mode-set-new-tag x)
     (with-helm-buffer
       (setq-local helm-input-local " ")
       )
@@ -153,15 +153,15 @@
 
 (setq librarian-tagging-mode--helm-source
       (helm-make-source "Helm Tagging" 'helm-source
-        :action (helm-make-actions "Re-entrant-set" #'tagging-minor-mode-set-tags-re-entrant
-                                   "Set"            #'tagging-minor-mode-set-tags)
-        :pattern-transformer #'tagging-minor-mode--trim-input
+        :action (helm-make-actions "Re-entrant-set" #'librarian-tagging-mode-set-tags-re-entrant
+                                   "Set"            #'librarian-tagging-mode-set-tags)
+        :pattern-transformer #'librarian-tagging-mode--trim-input
         )
       )
 (setq librarian-tagging-mode--fallback-source
       (helm-build-dummy-source "Helm Tags Fallback Source"
-        :action (helm-make-actions "Re-entrant-Create" #'tagging-minor-mode-set-new-tag-re-entrant
-                                   "Create"            #'tagging-minor-mode-set-new-tag)
+        :action (helm-make-actions "Re-entrant-Create" #'librarian-tagging-mode-set-new-tag-re-entrant
+                                   "Create"            #'librarian-tagging-mode-set-new-tag)
         :filtered-candidate-transformer (lambda (_c _s) (list helm-pattern)))
       )
 
@@ -174,8 +174,8 @@
 
   (save-excursion
     (goto-char beg)
-    (let* ((current-tags (tagging-minor-mode-get-tags))
-           (candidates   (tagging-minor-mode-candidates current-tags))
+    (let* ((current-tags (librarian-tagging-mode-get-tags))
+           (candidates   (librarian-tagging-mode-candidates current-tags))
            (main-source (cons `(candidates . ,candidates) librarian-tagging-mode--helm-source))
            )
       (helm :sources (list main-source librarian-tagging-mode--fallback-source)
@@ -186,4 +186,4 @@
     )
   )
 
-(provide 'tagging-minor-mode-helm-tagger)
+(provide 'librarian-tagging-mode-helm-tagger)
