@@ -5,6 +5,7 @@
 (require 'helm-grep)
 (require 'helm-utils)
 (require 'helm-files)
+(require 'tag-charting)
 
 (defvar tagging-minor-mode--helm-source)
 (defvar tagging-minor-mode--fallback-source)

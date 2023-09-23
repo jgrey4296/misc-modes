@@ -102,3 +102,5 @@
                    ("C" tagging-minor-mode-ivy-tag-clear "Clear Tag")
                    ("r" tagging-minor-mode-ivy-replace "Replace Tag")
                    ))
+
+(provide 'tagging-ivy)
