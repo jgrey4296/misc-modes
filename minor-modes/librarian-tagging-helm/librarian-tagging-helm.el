@@ -5,7 +5,7 @@
 (require 'helm-grep)
 (require 'helm-utils)
 (require 'helm-files)
-(require 'tag-charting)
+(require 'librarian-tagging-chart)
 
 (defvar librarian-tagging-mode--helm-source)
 (defvar librarian-tagging-mode--fallback-source)
@@ -113,7 +113,7 @@
                (cand-pairs (-zip-pair cand-keys cand-vals))
                (maxTagLength (apply 'max (mapcar 'length cand-keys)))
                (maxTagAmount (apply 'max cand-vals))
-               (bar-keys (librarian-tagging-mode--make-bar-chart cand-pairs maxTagLength maxTagAmount))
+               (bar-keys (librarian-tagging-chart--make-bar-chart cand-pairs maxTagLength maxTagAmount))
                (display-pairs (-zip-pair bar-keys cand-keys))
                (propertied-tags (cl-map 'list (lambda (candidate)
                                              (let ((candString (car candidate)))
@@ -186,4 +186,4 @@
     )
   )
 
-(provide 'librarian-tagging-mode-helm-tagger)
+(provide 'librarian-tagging-helm)
