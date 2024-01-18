@@ -13,7 +13,7 @@
 (defvar-local general-insert-keys nil)
 
 (defun general-insert--propertize (mode file)
-  (let ((base (format "%-20s # %s" (f-base file) mode)))
+  (let ((base (format "%-20s # %s" (f-filename file) mode)))
     (set-text-properties 0 (length base) `(path ,file) base)
     base
     )
