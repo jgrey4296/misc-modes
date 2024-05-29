@@ -5,24 +5,42 @@
 (require 'helm-grep)
 (require 'helm-utils)
 (require 'helm-files)
+(require 'librarian-tagging)
 (require 'librarian-tagging-chart)
 
-(defvar librarian-tagging-mode--helm-source)
-(defvar librarian-tagging-mode--fallback-source)
-(defvar librarian-tagging-mode--helm-buffer-name  "*Helm Tags*")
-(defvar librarian-tagging-mode-re-entrant-quit-char "|")
+(defvar librarian-tagging-helm--helm-source
+      (helm-make-source "Helm Tagging" 'helm-source
+        :action (helm-make-actions "Re-entrant-set" #'librarian-tagging-helm-set-tags-re-entrant
+                                   "Set"            #'librarian-tagging-helm-set-tags-oneshot)
+        :pattern-transformer #'(lambda (x) (car (librarian-normalize-tags major-mode (list x))))
+        :candidates #'(lambda () librarian-tagging-helm--candidate-names)
+        ;; :update #'(lambda () librarian-tagging-helm--candidate-names)
+        :allow-dups nil
+        )
+      )
 
-(defvar librarian-tagging-mode-candidate-counts '())
-(defvar librarian-tagging-mode-candidate-names '())
+(defvar librarian-tagging-helm--fallback-source
+      (helm-build-dummy-source "Helm Tags Fallback Source"
+        :action (helm-make-actions "Re-entrant-Create" #'librarian-tagging-helm-set-tags-re-entrant
+                                   "Create"            #'librarian-tagging-helm-set-tags-oneshot)
+        :filtered-candidate-transformer (lambda (_c _s) (list helm-pattern)))
+      )
 
-(defun librarian-tagging-mode--trim-input (x)
-  (let ((trimmed (string-trim x)))
-    (s-replace-regexp "\s+" "_" trimmed)
-    )
-  )
+(defvar librarian-tagging-helm--helm-buffer-name  "*Helm Tags*")
+
+(defvar librarian-tagging-helm-re-entrant-quit-char "|")
+
+(defvar librarian-tagging-helm--candidate-names '())
+
+(defvar librarian-tagging-helm--global-max-length nil)
+
+(defvar librarian-tagging-helm--global-max-count nil)
+
+(defvar librarian-tagging-helm--global-bar-chart nil)
 
 (define-advice helm-grep--prepare-cmd-line (:override (only-files &optional include zgrep)
                                             librarian-tagging-mode-grep-helm-override)
+  ""
   (let* ((default-directory (or helm-ff-default-directory
                                 (helm-default-directory)
                                 default-directory))
@@ -84,14 +102,15 @@
      (format "%s --smart-case --color %s" ack pipe-switches)))
   )
 
-(defun librarian-tagging-mode-insert-candidates (x)
+(defun librarian-tagging-helm-insert-candidates (x)
   "A Helm action to insert selected candidates into the current buffer "
-  (let ((candidates (helm-marked-candidates)))
+  (let ((candidates (car (helm-marked-candidates))))
     (with-helm-current-buffer
       ;;Substring -2 to chop off separating marks
-      (insert (mapconcat (lambda (x) (substring x 0 -2)) candidates "\n")))))
+      (insert (mapconcat (lambda (x) (substring x 0 -2)) candidates "\n"))))
+  )
 
-(defun librarian-tagging-mode--sort-candidates (ap bp)
+(defun librarian-tagging-helm--sort-candidates (ap bp)
   " Sort routine to sort by colour then lexicographically "
   (let* ((a (car ap))
          (b (car bp))
@@ -104,85 +123,91 @@
      ((and (not aprop) (not bprop) (> (funcall lookup ap) (funcall lookup bp))))
      )))
 
-(defun librarian-tagging-mode-candidates (current-tags)
-  " Given Candidates, colour them if they are assigned, then sort them  "
-  (let* ((global-tags librarian-tagging-mode-global-tags))
-    (if (not (hash-table-empty-p global-tags))
-        (let* ((cand-keys (hash-table-keys global-tags))
-               (cand-vals (hash-table-values global-tags))
-               (cand-pairs (-zip-pair cand-keys cand-vals))
-               (maxTagLength (apply 'max (mapcar 'length cand-keys)))
-               (maxTagAmount (apply 'max cand-vals))
-               (bar-keys (librarian-tagging-chart--make-bar-chart cand-pairs maxTagLength maxTagAmount))
-               (display-pairs (-zip-pair bar-keys cand-keys))
-               (propertied-tags (cl-map 'list (lambda (candidate)
-                                             (let ((candString (car candidate)))
-                                               (if (-contains? current-tags (cdr candidate))
-                                                   (progn (put-text-property 0 (length candString)
-                                                                             'font-lock-face
-                                                                             'rainbow-delimiters-depth-1-face
-                                                                             candString)))
-                                               `(,candString ,(cdr candidate)))) display-pairs))
+(defun librarian-tagging-helm--propertize-entry (candidate)
+  (let ((propstring (concat candidate)))
+    (progn (put-text-property 0
+                              (length propstring)
+                              'font-lock-face
+                              'rainbow-delimiters-depth-1-face
+                              propstring))
+    (list propstring candidate))
+  )
+
+(defun librarian-tagging-helm-format-candidates ()
+  " Given Candidates, colour them if they are assigned, then sort them,
+formatted as a bar chart
+  "
+  (let* ((global-tags librarian-tagging-mode-global-tags)
+         (current-tags librarian-tagging--current-entry-tags)
+         )
+    (cond ((hash-table-empty-p global-tags)
+           nil)
+          ((null librarian-tagging-helm--global-max-length)
+           (let* ((cand-keys (hash-table-keys global-tags))
+                  (cand-vals (hash-table-values global-tags))
+                  (cand-pairs (-zip-pair cand-keys cand-vals))
+                  (maxTagLength (or librarian-tagging-helm--global-max-length
+                                    (apply 'max (mapcar 'length cand-keys))))
+                  (maxTagAmount (or librarian-tagging-helm--global-max-count
+                                    (apply 'max cand-vals)))
+                  (display-pairs (or librarian-tagging-helm--global-bar-chart
+                                     (-zip-pair
+                                      (librarian-tagging-chart--make-bar-chart cand-pairs maxTagLength maxTagAmount)
+                                      cand-keys)))
+                  (propertied-tags (mapcar #'librarian-tagging-helm--propertize-entry current-tags))
+                  )
+             (setq librarian-tagging-helm--global-max-length maxTagLength
+                   librarian-tagging-helm--global-max-counti maxTagAmount
+                   librarian-tagging-helm--global-bar-chart  display-pairs
+                   librarian-tagging-helm--candidate-names (append (sort propertied-tags 'librarian-tagging-helm--sort-candidates)
+                                                                   display-pairs)
+                   )
+             ))
+          (t (let ((propertied-tags (mapcar #'librarian-tagging-helm--propertize-entry current-tags))
+                   )
+               (setq librarian-tagging-helm--candidate-names (append (sort propertied-tags 'librarian-tagging-helm--sort-candidates)
+                                                                     librarian-tagging-helm--global-bar-chart)
+                     )
                )
-          (setq librarian-tagging-mode-candidate-counts global-tags)
-          (setq librarian-tagging-mode-candidate-names (sort propertied-tags 'librarian-tagging-mode--sort-candidates))
+             )
           )
-      '()
-      ))
-  )
-
-(defun librarian-tagging-mode-set-tags-re-entrant (x)
-  (unless (s-equals? (s-trim (car x)) librarian-tagging-mode-re-entrant-quit-char)
-    (librarian-tagging-mode-set-tags x)
-    (with-helm-buffer
-      (setq-local helm-input-local " ")
-      )
-    (helm-resume librarian-tagging-mode--helm-buffer-name)
     )
   )
 
-(defun librarian-tagging-mode-set-new-tag-re-entrant (x)
-  (unless (s-equals? (s-trim x) librarian-tagging-mode-re-entrant-quit-char)
-    (librarian-tagging-mode-set-new-tag x)
-    (with-helm-buffer
-      (setq-local helm-input-local " ")
-      )
-    (helm-resume librarian-tagging-mode--helm-buffer-name)
+(defun librarian-tagging-helm-set-tags-oneshot (x)
+  (with-current-buffer helm-current-buffer
+    (librarian-tagging-mode-set-tags (-flatten (helm-marked-candidates)))
     )
   )
 
-(setq librarian-tagging-mode--helm-source
-      (helm-make-source "Helm Tagging" 'helm-source
-        :action (helm-make-actions "Re-entrant-set" #'librarian-tagging-mode-set-tags-re-entrant
-                                   "Set"            #'librarian-tagging-mode-set-tags)
-        :pattern-transformer #'librarian-tagging-mode--trim-input
+(defun librarian-tagging-helm-set-tags-re-entrant (x)
+  (librarian-tagging-helm-set-tags-oneshot x)
+  (cond ((-contains? (-flatten (helm-marked-candidates)) librarian-tagging-helm-re-entrant-quit-char)
+         nil
+         )
+        (t (with-helm-buffer
+             (setq-local helm-input-local " ")
+             )
+           (helm-resume librarian-tagging-helm--helm-buffer-name)
+           )
         )
-      )
-(setq librarian-tagging-mode--fallback-source
-      (helm-build-dummy-source "Helm Tags Fallback Source"
-        :action (helm-make-actions "Re-entrant-Create" #'librarian-tagging-mode-set-new-tag-re-entrant
-                                   "Create"            #'librarian-tagging-mode-set-new-tag)
-        :filtered-candidate-transformer (lambda (_c _s) (list helm-pattern)))
-      )
+  )
 
-(evil-define-command librarian-tagging-mode-tagger (&optional beg end type)
+(evil-define-command librarian-tagging-helm (&optional beg end type)
   " Opens the Tagging Helm "
   (interactive "<R>")
   (unless librarian-tagging-mode (user-error "Tagging Minor Mode not active"))
   (set-marker librarian-tagging-mode-marker end)
-  (get-buffer-create librarian-tagging-mode--helm-buffer-name)
+  (get-buffer-create librarian-tagging-helm--helm-buffer-name)
 
   (save-excursion
     (goto-char beg)
-    (let* ((current-tags (librarian-tagging-mode-get-tags))
-           (candidates   (librarian-tagging-mode-candidates current-tags))
-           (main-source (cons `(candidates . ,candidates) librarian-tagging-mode--helm-source))
-           )
-      (helm :sources (list main-source librarian-tagging-mode--fallback-source)
-            :input ""
-            :buffer librarian-tagging-mode--helm-buffer-name
-            )
-      )
+    (librarian-tagging-mode-get-tags)
+    (librarian-tagging-helm-format-candidates)
+    (helm :sources (list librarian-tagging-helm--helm-source librarian-tagging-helm--fallback-source)
+          :input ""
+          :buffer librarian-tagging-helm--helm-buffer-name
+          )
     )
   )
 
