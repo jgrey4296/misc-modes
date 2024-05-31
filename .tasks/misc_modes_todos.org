@@ -1,0 +1,50 @@
+#+title: Misc Modes Todos
+* misc-modes                                     :modes:
+:PROPERTIES:
+:ID:       48251014-e721-4c55-85b2-32918124b9d9
+:END:
+** major modes
+*** timeline insert
+*** palette insert with colours
+*** lint result mode
+*** logview mode
+*** godot mode
+*** hexyl mode
+*** pdf-meta mode
+*** rawtag mode
+*** timeline mode
+*** coverage mode
+*** cron mode
+*** QUEUED definition mode
+similar to wordnut-search
+add/lookup timeline+definitions
+*** lint result mode
+*** logview mode
+*** cobol-mode
+*** definition-lookup: move to librarian
+*** separate ai modes to new repo
+**** jacamo mode
+**** [#A] agentspeak mode
+**** soar mode
+**** ceptre mode
+** minor modes
+*** doot mode
+*** general insert
+**** editor+highlighting mode
+
+*** jg-company
+*** librarian-tagging-helm
+*** librarian-tagging-vy
+*** music-minor
+*** org-unit-test
+*** overlay-ctrl
+** babel
+*** ccalc
+*** ceptre
+*** clingo
+*** clips
+*** erlang
+*** plantuml
+*** soar
+*** z3
+** ox-epub
