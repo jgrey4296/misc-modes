@@ -116,7 +116,7 @@
          (b (car bp))
          (aprop (get-text-property 0 'font-lock-face a))
          (bprop (get-text-property 0 'font-lock-face b))
-         (lookup (lambda (x) (gethash (cadr x) librarian-tagging-mode-global-tags))))
+         (lookup (lambda (x) (gethash (cadr x) librarian-tagging-mode-global-tags 1))))
     (cond
      ((and aprop bprop (> (funcall lookup ap) (funcall lookup bp))) t)
      ((and aprop (not bprop)) t)
