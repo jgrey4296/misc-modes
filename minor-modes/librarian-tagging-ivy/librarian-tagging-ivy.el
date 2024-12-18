@@ -1,7 +1,11 @@
 ;;; tagging-ivy.el -*- lexical-binding: t; -*-
 ;; Adds actions to ivy for easy search + tagging of files from dired
 
-(require 'ivy)
+(eval-when-compile
+  (require 'ivy)
+  (require 'librarian--tag)
+  (require 'librarian--tag-chart)
+  )
 
 (defvar librarian-tagging-selected-tag nil)
 

@@ -22,22 +22,19 @@
     (rx-let ((w (x) (: x (0+ space)))
                 (g (x) (group x))
                 (ln line-end)
-                (subword (+ (| word (any "-,.0-9_"))))
                 (sep (w "::"))
-                (wordgroup (+ (w (+ subword))))
-                (rest (: (*? not-newline) ln))
+                (subword (1+ (| word (any "-,.0-9()_"))))
+                (wordgroup (1+ (w subword)))
                 )
         (list
-         `(,(rx (g sep) (g wordgroup))
-           (1 'font-lock-regexp-face t t)
-           (2 'org-checkbox t t))
          `(,(rx line-start (g wordgroup) (g sep) (g (w (+ digit))))
            (0 'error)
            (1 'org-priority t t)
            (2 'font-lock-regexp-face t t)
            (3 'font-lock-type-face t t))
-         `(,(rx line-start "%% " (*? anychar) ln)
-           (0 'font-lock-comment-face t))
+         `(,(rx (g sep) (g wordgroup))
+           (1 'font-lock-regexp-face t t)
+           (2 'org-checkbox t t))
          )
         )
     "Highlighting for subfile-mode"
@@ -60,9 +57,10 @@
         (modify-syntax-entry ?\; "_" st)
         ;;underscores are valid parts of words:
         (modify-syntax-entry ?_ "w" st)
-        ;; Comments start with // and end on newlines
         (modify-syntax-entry ?/ ". 125" st)
         (modify-syntax-entry ?* "_ 23b" st)
+        ;; Comments start and end:
+        (modify-syntax-entry ?% ".< 12" st)
         (modify-syntax-entry ?\n ">" st)
         ;; Strings
         (modify-syntax-entry ?\" "\"" st)
@@ -85,12 +83,13 @@
     (use-local-map subfile-mode-map)
 
     ;; font-lock-defaults: (keywords disable-syntactic case-fold syntax-alist)
-    (set (make-local-variable 'font-lock-defaults) (list subfile-font-lock-keywords nil))
+    (setq-local font-lock-defaults (list subfile-font-lock-keywords nil)
+                comment-style '(plain)
+                comment-start "%%"
+                comment-use-syntax t
+                )
     ;; (set (make-local-variable 'font-lock-syntactic-face-function) 'subfile-syntactic-face-function)
     ;; (set (make-local-variable 'indent-line-function) 'subfile-indent-line)
-    (set (make-local-variable 'comment-style) '(plain))
-    (set (make-local-variable 'comment-start) "%%")
-    (set (make-local-variable 'comment-use-syntax) t)
     (set-syntax-table subfile-mode-syntax-table)
     ;;
     (setq major-mode 'subfile-mode)
