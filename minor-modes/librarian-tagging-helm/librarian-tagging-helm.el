@@ -118,7 +118,7 @@
          (b (car bp))
          (aprop (get-text-property 0 'font-lock-face a))
          (bprop (get-text-property 0 'font-lock-face b))
-         (lookup (lambda (x) (gethash (cadr x) librarian-tag-mode-global-tags 1))))
+         (lookup (lambda (x) (gethash (cadr x) librarian-tag-global-tags 1))))
     (cond
      ((and aprop bprop (> (funcall lookup ap) (funcall lookup bp))) t)
      ((and aprop (not bprop)) t)
@@ -141,7 +141,7 @@
   " Given Candidates, colour them if they are assigned, then sort them,
 formatted as a bar chart
   "
-  (let* ((global-tags librarian-tag-mode-global-tags)
+  (let* ((global-tags librarian-tag-global-tags)
          (current-tags librarian-tagging--current-entry-tags)
          )
     (cond ((hash-table-empty-p global-tags)
@@ -201,7 +201,7 @@ formatted as a bar chart
   " Opens the Tagging Helm "
   (interactive "<R>")
   (unless librarian-tag-mode (user-error "Tagging Minor Mode not active"))
-  (set-marker librarian-tag-mode-marker end)
+  (set-marker librarian--tag-marker end)
   (get-buffer-create librarian-tagging-helm--helm-buffer-name)
 
   (save-excursion
