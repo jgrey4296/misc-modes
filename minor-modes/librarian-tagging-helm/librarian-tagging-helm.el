@@ -201,7 +201,7 @@ formatted as a bar chart
   " Opens the Tagging Helm "
   (interactive "<R>")
   (unless librarian-tag-mode (user-error "Tagging Minor Mode not active"))
-  (set-marker librarian-tag-mode-marker end)
+  (set-marker librarian--tag-marker end)
   (get-buffer-create librarian-tagging-helm--helm-buffer-name)
 
   (save-excursion
