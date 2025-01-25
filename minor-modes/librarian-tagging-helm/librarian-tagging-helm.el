@@ -8,37 +8,37 @@
   (require 'helm-files)
   (require 'librarian--tag)
   (require 'librarian--tag-chart)
+  (require 'librarian--tag-mode)
   )
 
-(defvar librarian-tagging-helm--helm-source
+(defvar litm--helm-source
   (helm-make-source "Helm Tagging" 'helm-source
-    :action (helm-make-actions "Re-entrant-set" #'librarian-tagging-helm-set-tags-re-entrant
-                               "Set"            #'librarian-tagging-helm-set-tags-oneshot)
+    :action (helm-make-actions "Re-entrant-set" #'litm-set-tags-re-entrant
+                               "Set"            #'litm-set-tags-oneshot)
     :pattern-transformer #'(lambda (x) (car (librarian-normalize-tags major-mode (list x))))
-    :candidates #'(lambda () librarian-tagging-helm--candidate-names)
-    ;; :update #'(lambda () librarian-tagging-helm--candidate-names)
+    :candidates #'(lambda () litm--candidate-names)
     :allow-dups nil
     )
   )
 
-(defvar librarian-tagging-helm--fallback-source
+(defvar litm--fallback-source
   (helm-build-dummy-source "Helm Tags Fallback Source"
-    :action (helm-make-actions "Re-entrant-Create" #'librarian-tagging-helm-set-tags-re-entrant
-                               "Create"            #'librarian-tagging-helm-set-tags-oneshot)
+    :action (helm-make-actions "Re-entrant-Create" #'litm-set-tags-re-entrant
+                               "Create"            #'litm-set-tags-oneshot)
     :filtered-candidate-transformer (lambda (_c _s) (list helm-pattern)))
   )
 
-(defvar librarian-tagging-helm--helm-buffer-name  "*Helm Tags*")
+(defvar litm--helm-buffer-name  "*Helm Tags*")
 
-(defvar librarian-tagging-helm-re-entrant-quit-char "|")
+(defvar litm-re-entrant-quit-char "|")
 
-(defvar librarian-tagging-helm--candidate-names '())
+(defvar litm--candidate-names '())
 
-(defvar librarian-tagging-helm--global-max-length nil)
+(defvar litm--global-max-length nil)
 
-(defvar librarian-tagging-helm--global-max-count nil)
+(defvar litm--global-max-count nil)
 
-(defvar librarian-tagging-helm--global-bar-chart nil)
+(defvar litm--global-bar-chart nil)
 
 (define-advice helm-grep--prepare-cmd-line (:override (only-files &optional include zgrep)
                                                       librarian-tag-mode-grep-helm-override)
@@ -71,7 +71,6 @@
          (pipes (if (cdr patterns)
                     (concat pipcom (s-join pipcom (mapcar #'shell-quote-argument (cdr patterns))))
                   ""))
-         ;; (patterns-alt (s-join " -e " (mapcar #'shell-quote-argument patterns)))
          (cmd (format-spec helm-grep-default-command
                            (delq nil
                                  (list (unless zgrep
@@ -80,10 +79,8 @@
                                            (cons ?e exclude)))
                                        (cons ?c (or smartcase ""))
                                        (cons ?p (shell-quote-argument (car patterns)))
-                                       ;; (cons ?p patterns-alt)
                                        (cons ?f fnargs)
                                        (cons ?m pipes)
-                                       ;; (cons ?m "")
                                        ))))
          )
     cmd
@@ -104,7 +101,7 @@
      (format "%s --smart-case --color %s" ack pipe-switches)))
   )
 
-(defun librarian-tagging-helm-insert-candidates (x)
+(defun litm-insert-candidates (x)
   "A Helm action to insert selected candidates into the current buffer "
   (let ((candidates (car (helm-marked-candidates))))
     (with-helm-current-buffer
@@ -112,65 +109,65 @@
       (insert (mapconcat (lambda (x) (substring x 0 -2)) candidates "\n"))))
   )
 
-(defun librarian-tagging-helm--sort-candidates (ap bp)
+(defun litm-sort-candidates (ap bp)
   " Sort routine to sort by colour then lexicographically "
   (let* ((a (car ap))
          (b (car bp))
          (aprop (get-text-property 0 'font-lock-face a))
          (bprop (get-text-property 0 'font-lock-face b))
-         (lookup (lambda (x) (gethash (cadr x) librarian-tag-global-tags 1))))
+         (lookup (lambda (x) (gethash (cadr x) librarian--tag-global-tags 1))))
     (cond
      ((and aprop bprop (> (funcall lookup ap) (funcall lookup bp))) t)
      ((and aprop (not bprop)) t)
      ((and (not aprop) (not bprop) (> (funcall lookup ap) (funcall lookup bp))))
      )
-
-    (defun librarian-tagging-helm--propertize-entry (candidate)
-      (let ((propstring (concat candidate)))
-        (progn (put-text-property 0
-                                  (length propstring)
-                                  'font-lock-face
-                                  'rainbow-delimiters-depth-1-face
-                                  propstring))
-        (list propstring candidate))
-      )
     )
   )
 
-(defun librarian-tagging-helm-format-candidates ()
+(defun litm-propertize-entry (candidate)
+  (let ((propstring (concat candidate)))
+    (progn (put-text-property 0
+                              (length propstring)
+                              'font-lock-face
+                              'rainbow-delimiters-depth-1-face
+                              propstring))
+    (list propstring candidate))
+  )
+
+(defun litm-format-candidates ()
   " Given Candidates, colour them if they are assigned, then sort them,
 formatted as a bar chart
   "
-  (let* ((global-tags librarian-tag-global-tags)
-         (current-tags librarian-tagging--current-entry-tags)
+  (let* ((global-tags librarian--tag-global-tags)
+         (current-tags librarian--tag--current-entry-tags)
          )
     (cond ((hash-table-empty-p global-tags)
            nil)
-          ((null librarian-tagging-helm--global-max-length)
+          ((null litm--global-max-length)
            (let* ((cand-keys (hash-table-keys global-tags))
                   (cand-vals (hash-table-values global-tags))
                   (cand-pairs (-zip-pair cand-keys cand-vals))
-                  (maxTagLength (or librarian-tagging-helm--global-max-length
+                  (maxTagLength (or litm--global-max-length
                                     (apply 'max (mapcar 'length cand-keys))))
-                  (maxTagAmount (or librarian-tagging-helm--global-max-count
+                  (maxTagAmount (or litm--global-max-count
                                     (apply 'max cand-vals)))
-                  (display-pairs (or librarian-tagging-helm--global-bar-chart
+                  (display-pairs (or litm--global-bar-chart
                                      (-zip-pair
-                                      (librarian-tagging-chart--make-bar-chart cand-pairs maxTagLength maxTagAmount)
+                                      (librarian--tag-chart--make-bar-chart cand-pairs maxTagLength maxTagAmount)
                                       cand-keys)))
-                  (propertied-tags (mapcar #'librarian-tagging-helm--propertize-entry current-tags))
+                  (propertied-tags (mapcar #'litm-propertize-entry current-tags))
                   )
-             (setq librarian-tagging-helm--global-max-length maxTagLength
-                   librarian-tagging-helm--global-max-counti maxTagAmount
-                   librarian-tagging-helm--global-bar-chart  display-pairs
-                   librarian-tagging-helm--candidate-names (append (sort propertied-tags 'librarian-tagging-helm--sort-candidates)
+             (setq litm--global-max-length maxTagLength
+                   litm--global-max-counti maxTagAmount
+                   litm--global-bar-chart  display-pairs
+                   litm--candidate-names (append (sort propertied-tags 'litm-sort-candidates)
                                                                    display-pairs)
                    )
              ))
-          (t (let ((propertied-tags (mapcar #'librarian-tagging-helm--propertize-entry current-tags))
+          (t (let ((propertied-tags (mapcar #'litm-propertize-entry current-tags))
                    )
-               (setq librarian-tagging-helm--candidate-names (append (sort propertied-tags 'librarian-tagging-helm--sort-candidates)
-                                                                     librarian-tagging-helm--global-bar-chart)
+               (setq litm--candidate-names (append (sort propertied-tags 'litm-sort-candidates)
+                                                                     litm--global-bar-chart)
                      )
                )
              )
@@ -178,21 +175,21 @@ formatted as a bar chart
     )
   )
 
-(defun librarian-tagging-helm-set-tags-oneshot (x)
+(defun litm-set-tags-oneshot (x)
   (with-current-buffer helm-current-buffer
     (librarian-tag-mode-set-tags (-flatten (helm-marked-candidates)))
     )
   )
 
-(defun librarian-tagging-helm-set-tags-re-entrant (x)
-  (librarian-tagging-helm-set-tags-oneshot x)
-  (cond ((-contains? (-flatten (helm-marked-candidates)) librarian-tagging-helm-re-entrant-quit-char)
+(defun litm-set-tags-re-entrant (x)
+  (litm-set-tags-oneshot x)
+  (cond ((-contains? (-flatten (helm-marked-candidates)) litm-re-entrant-quit-char)
          nil
          )
         (t (with-helm-buffer
              (setq-local helm-input-local " ")
              )
-           (helm-resume librarian-tagging-helm--helm-buffer-name)
+           (helm-resume litm--helm-buffer-name)
            )
         )
   )
@@ -202,17 +199,22 @@ formatted as a bar chart
   (interactive "<R>")
   (unless librarian-tag-mode (user-error "Tagging Minor Mode not active"))
   (set-marker librarian--tag-marker end)
-  (get-buffer-create librarian-tagging-helm--helm-buffer-name)
+  (get-buffer-create litm--helm-buffer-name)
 
   (save-excursion
     (goto-char beg)
     (librarian-tag-mode-get-tags)
-    (librarian-tagging-helm-format-candidates)
-    (helm :sources (list librarian-tagging-helm--helm-source librarian-tagging-helm--fallback-source)
+    (litm-format-candidates)
+    (helm :sources (list litm--helm-source litm--fallback-source)
           :input ""
-          :buffer librarian-tagging-helm--helm-buffer-name
+          :buffer litm--helm-buffer-name
           )
     )
   )
 
 (provide 'librarian-tagging-helm)
+;; Local Variables:
+;; read-symbol-shorthands: (
+;; ("litm-" . "librarian--tag-helm-")
+;; )
+;; End:
