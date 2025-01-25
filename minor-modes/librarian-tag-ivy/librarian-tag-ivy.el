@@ -5,23 +5,24 @@
   (require 'ivy)
   (require 'librarian--tag)
   (require 'librarian--tag-chart)
+  (require 'librarian--tag-mode)
   )
 
-(defvar librarian-tagging-selected-tag nil)
+(defvar liti-selected-tag nil)
 
-(defun librarian-tagging-ivy-tag-set (x)
+(defun liti-tag-set (x)
   " Register a tag to reuse "
   (message "Registering")
-  (setq librarian-tagging-selected-tag (read-string "Store Tag: "))
+  (setq liti-selected-tag (read-string "Store Tag: "))
   )
 
-(defun librarian-tagging-ivy-tag-clear (x)
+(defun liti-tag-clear (x)
   " Clear the registered tag "
   (message "Clearing")
-  (setq librarian-tagging-selected-tag nil)
+  (setq liti-selected-tag nil)
   )
 
-(defun librarian-tagging-ivy-set-tags (tag)
+(defun liti-set-tags (tag)
   (goto-char (line-beginning-position))
   (if (re-search-forward "^\*\* Thread:.+?\s+\\(:.+?:\\)$" (line-end-position) t)
         (let* ((match (match-data))
@@ -40,14 +41,14 @@
       (goto-char (line-end-position))
       (insert "          " ":" tag ":"))))
 
-(defun librarian-tagging-ivy-tag (x)
+(defun liti-tag (x)
   "Opens the current candidate in another window."
   (when (string-match "\\`\\(.*?\\):\\([0-9]+\\):\\(.*\\)\\'" x)
     (let* ((file-name   (match-string-no-properties 1 x))
            (line-number (string-to-number (match-string-no-properties 2 x)))
            (full-file (expand-file-name file-name (ivy-state-directory ivy-last)))
            (input (plist-get (plist-get (ivy-state-extra-props ivy-last) :ivy-data) :text))
-           (the-tag (if (not librarian-tagging-selected-tag) (read-string "Tag as: ") librarian-tagging-selected-tag))
+           (the-tag (if (not liti-selected-tag) (read-string "Tag as: ") liti-selected-tag))
           )
       (message "Using Tag: %s" the-tag)
       (with-temp-buffer
@@ -60,7 +61,7 @@
         (if (re-search-backward "^\*\* Thread:" nil t)
             (progn
               ;; Set Tags
-              (librarian-tagging-ivy-set-tags the-tag)
+              (liti-set-tags the-tag)
               ;; Save the file
               (write-file full-file))
           )
@@ -69,7 +70,7 @@
     )
   )
 
-(defun librarian-tagging-ivy-replace (x)
+(defun liti-replace (x)
   "Opens the current candidate in another window."
   (when (string-match "\\`\\(.*?\\):\\([0-9]+\\):\\(.*\\)\\'" x)
     (let* ((file-name   (match-string-no-properties 1 x))
@@ -79,9 +80,9 @@
            (input ivy-text)
            the-tag
           )
-      (setq the-tag (if (not librarian-tagging-selected-tag)
+      (setq the-tag (if (not liti-selected-tag)
                         (read-string (format "Replace %s with: " the-line))
-                      librarian-tagging-selected-tag))
+                      liti-selected-tag))
       ;;(message "Swapping %s for: %s in %s:%s" input the-tag full-file line-number)
       (with-temp-buffer
         ;; open the file indirectly
@@ -101,10 +102,15 @@
   )
 
 (ivy-set-actions 'counsel-rg
-                 '(("t" librarian-tagging-ivy-tag "Tag")
-                   ("T" librarian-tagging-ivy-tag-set "Set Tag")
-                   ("C" librarian-tagging-ivy-tag-clear "Clear Tag")
-                   ("r" librarian-tagging-ivy-replace "Replace Tag")
+                 '(("t" liti-tag "Tag")
+                   ("T" liti-tag-set "Set Tag")
+                   ("C" liti-tag-clear "Clear Tag")
+                   ("r" liti-replace "Replace Tag")
                    ))
 
-(provide 'librarian-tagging-ivy)
+(provide 'librarian-tag-ivy)
+;; Local Variables:
+;; read-symbol-shorthands: (
+;; ("liti-" . "librarian-tag-ivy-")
+;; )
+;; End:

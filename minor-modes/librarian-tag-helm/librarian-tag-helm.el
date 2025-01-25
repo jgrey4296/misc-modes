@@ -194,7 +194,7 @@ formatted as a bar chart
         )
   )
 
-(evil-define-command librarian-tagging-helm (&optional beg end type)
+(evil-define-command librarian-tag-helm (&optional beg end type)
   " Opens the Tagging Helm "
   (interactive "<R>")
   (unless librarian-tag-mode (user-error "Tagging Minor Mode not active"))
@@ -212,7 +212,7 @@ formatted as a bar chart
     )
   )
 
-(provide 'librarian-tagging-helm)
+(provide 'librarian-tag-helm)
 ;; Local Variables:
 ;; read-symbol-shorthands: (
 ;; ("litm-" . "librarian--tag-helm-")
