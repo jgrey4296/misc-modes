@@ -6,39 +6,40 @@
 ;;-- end header
 
 ;;-- imports
-(require 'rx)
+(eval-when-compile
+  (require 'rx)
+  )
 ;;-- end imports
 
 ;;-- keymap
 
-(defvar-local subfile-mode-map
-    (make-sparse-keymap))
+(defvar-local subfile-mode-map (make-sparse-keymap))
 
 ;;-- end keymap
 
 ;;-- font lock
 
 (defconst subfile-font-lock-keywords
-    (rx-let ((w (x) (: x (0+ space)))
-                (g (x) (group x))
-                (ln line-end)
-                (sep (w "::"))
-                (subword (1+ (| word (any "-,.0-9()_"))))
-                (wordgroup (1+ (w subword)))
-                )
-        (list
-         `(,(rx line-start (g wordgroup) (g sep) (g (w (+ digit))))
-           (0 'error)
-           (1 'org-priority t t)
-           (2 'font-lock-regexp-face t t)
-           (3 'font-lock-type-face t t))
-         `(,(rx (g sep) (g wordgroup))
-           (1 'font-lock-regexp-face t t)
-           (2 'org-checkbox t t))
-         )
-        )
-    "Highlighting for subfile-mode"
+  (rx-let ((w (x) (: x (+ space)))
+           (g (x) (group x))
+           (ln line-end)
+           (sep (w (+ ":")))
+           (subword (+ (| word (any "-,.0-9()_"))))
+           (wordgroup (+? (w subword)))
+           )
+    (list
+     `(,(rx line-start (g wordgroup) (g sep) (g (w (+ digit))))
+       (0 'error)
+       (1 'org-priority t t)
+       (2 'font-lock-regexp-face t t)
+       (3 'font-lock-type-face t t))
+     `(,(rx (g sep) (g (: (? wordgroup) subword)) ln)
+       (1 'font-lock-regexp-face t t)
+       (2 'org-checkbox t t))
+     )
     )
+  "Highlighting for subfile-mode"
+  )
 
 ;;-- end font lock
 
