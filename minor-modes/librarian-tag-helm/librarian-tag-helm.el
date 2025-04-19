@@ -2,6 +2,7 @@
 
 (eval-when-compile
   (require 'evil)
+  (require 'dash)
   (require 'helm-source)
   (require 'helm-grep)
   (require 'helm-utils)
@@ -32,17 +33,17 @@
 
 (defvar litm-re-entrant-quit-char "|")
 
-(defvar litm--candidate-names '())
+(defvar litm--candidate-names '() "Current candidate names")
 
-(defvar litm--global-max-length nil)
+(defvar litm--global-max-length nil "cached global length of the largest tag")
 
-(defvar litm--global-max-count nil)
+(defvar litm--global-max-count nil "cached global largest count of a tag")
 
-(defvar litm--global-bar-chart nil)
+(defvar litm--global-bar-chart nil "The cached bar char of tags")
 
 (define-advice helm-grep--prepare-cmd-line (:override (only-files &optional include zgrep)
                                                       librarian-tag-mode-grep-helm-override)
-  ""
+  " "
   (let* ((default-directory (or helm-ff-default-directory
                                 (helm-default-directory)
                                 default-directory))
@@ -141,9 +142,9 @@ formatted as a bar chart
   (let* ((global-tags librarian--tag-global-tags)
          (current-tags librarian--tag--current-entry-tags)
          )
-    (cond ((hash-table-empty-p global-tags)
-           nil)
-          ((null litm--global-max-length)
+    (cond ((hash-table-empty-p global-tags) ;; there are no tags
+             nil)
+          ((null litm--global-max-length) ;; the max tag hasn't been calculated
            (let* ((cand-keys (hash-table-keys global-tags))
                   (cand-vals (hash-table-values global-tags))
                   (cand-pairs (-zip-pair cand-keys cand-vals))
@@ -161,36 +162,50 @@ formatted as a bar chart
                    litm--global-max-counti maxTagAmount
                    litm--global-bar-chart  display-pairs
                    litm--candidate-names (append (sort propertied-tags 'litm-sort-candidates)
-                                                                   display-pairs)
+                                                 display-pairs)
                    )
              ))
-          (t (let ((propertied-tags (mapcar #'litm-propertize-entry current-tags))
+          (t ;; Otherwise combine entry current with totals
+           (let ((propertied-tags (mapcar #'litm-propertize-entry current-tags)))
+             (setq litm--candidate-names (append (sort propertied-tags 'litm-sort-candidates)
+                                                 litm--global-bar-chart)
                    )
-               (setq litm--candidate-names (append (sort propertied-tags 'litm-sort-candidates)
-                                                                     litm--global-bar-chart)
-                     )
-               )
              )
+           )
           )
     )
   )
 
 (defun litm-set-tags-oneshot (x)
   (with-current-buffer helm-current-buffer
-    (librarian-tag-mode-set-tags (-flatten (helm-marked-candidates)))
+    ;; Add new tags to the global record
+    (let* ((flat (-flatten (helm-marked-candidates)))
+           (newtags (librarian-tag-mode-set-tags flat))
+           )
+      (message "Flat Tags: %s" flat)
+      (message "NewTags: %s" newtags)
+      (cl-loop for new in newtags
+               do
+               (message "Adding new tag: %s" new)
+               (push (cons (format "%s : 1+" new) new)
+                     litm--global-bar-chart)
+               )
+      )
     )
   )
 
 (defun litm-set-tags-re-entrant (x)
+  ;; Add the tags
   (litm-set-tags-oneshot x)
-  (cond ((-contains? (-flatten (helm-marked-candidates)) litm-re-entrant-quit-char)
-         nil
-         )
-        (t (with-helm-buffer
-             (setq-local helm-input-local " ")
-             )
-           (helm-resume litm--helm-buffer-name)
+  ;; Maybe resume the helm
+  (cond ((-contains? (-flatten (helm-marked-candidates)) litm-re-entrant-quit-char) ;; quit signalled
+         nil)
+        (t ;; else add and resume
+         (with-helm-buffer
+           (setq-local helm-input-local " ")
            )
+         (helm-resume litm--helm-buffer-name)
+         )
         )
   )
 
