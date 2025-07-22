@@ -148,10 +148,8 @@ formatted as a bar chart
            (let* ((cand-keys (hash-table-keys global-tags))
                   (cand-vals (hash-table-values global-tags))
                   (cand-pairs (-zip-pair cand-keys cand-vals))
-                  (maxTagLength (or litm--global-max-length
-                                    (apply 'max (mapcar 'length cand-keys))))
-                  (maxTagAmount (or litm--global-max-count
-                                    (apply 'max cand-vals)))
+                  (maxTagLength (apply 'max (or litm--global-max-length 0)  (mapcar 'length cand-keys)))
+                  (maxTagAmount (apply 'max (or litm--global-max-count 0) cand-vals))
                   (display-pairs (or litm--global-bar-chart
                                      (-zip-pair
                                       (librarian--tag-chart--make-bar-chart cand-pairs maxTagLength maxTagAmount)
@@ -159,7 +157,7 @@ formatted as a bar chart
                   (propertied-tags (mapcar #'litm-propertize-entry current-tags))
                   )
              (setq litm--global-max-length maxTagLength
-                   litm--global-max-counti maxTagAmount
+                   litm--global-max-count  maxTagAmount
                    litm--global-bar-chart  display-pairs
                    litm--candidate-names (append (sort propertied-tags 'litm-sort-candidates)
                                                  display-pairs)
@@ -206,6 +204,15 @@ formatted as a bar chart
            )
          (helm-resume litm--helm-buffer-name)
          )
+        )
+  )
+
+(defun litm-clear-candidates ()
+  (interactive)
+  (setq litm--global-max-length nil
+        litm--global-max-count  nil
+        litm--global-bar-chart  nil
+        litm--candidate-names   nil
         )
   )
 
