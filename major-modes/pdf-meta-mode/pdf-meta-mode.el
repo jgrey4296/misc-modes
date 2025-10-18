@@ -149,6 +149,22 @@
     )
   )
 
+;;;###autoload
+(defun pdf-meta-select-pages ()
+  (interactive)
+  (let ((target (read-file-name "Output Target: " default-directory nil nil "out.pdf"))
+        (range  (read-string "Page Range: " "1-2"))
+        (marked (dired-get-marked-files))
+        )
+    (cl-loop for file in marked
+             do
+             (call-process pdf-meta--cmd nil nil nil file
+                           "cat" range
+                           "output" target)
+             )
+    )
+  )
+
 ;;-- end dired funcs
 
 ;;-- key-map
