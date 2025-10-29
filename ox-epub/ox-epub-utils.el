@@ -338,3 +338,4 @@ INFO is a plist used as a communication channel."
 		    todo todo-type priority text tags :section-number nil)))))
 
 (provide 'ox-epub-utils)
+;;; ox-epub-utils.el ends here

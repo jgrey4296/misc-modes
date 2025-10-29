@@ -29,3 +29,4 @@
 ;; (message "Load Path: %s" (string-join load-path "\n"))
 
 ;; emacs --batch example.org  --script /path/to/batch-run.el -f org-epub-export-to-html
+;;; batch-run.el ends here

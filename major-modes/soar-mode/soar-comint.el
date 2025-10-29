@@ -63,3 +63,4 @@
 (add-hook 'soar-comint-mode-hook 'soar-comint--initialize)
 
 (provide 'soar-comint)
+;;; soar-comint.el ends here

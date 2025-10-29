@@ -534,3 +534,4 @@ holding export options."
 ;;-- end overridden for custom toc
 
 (provide 'ox-epub-transcoders)
+;;; ox-epub-transcoders.el ends here

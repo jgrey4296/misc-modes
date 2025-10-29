@@ -79,3 +79,4 @@
 (add-to-list 'auto-mode-alist '("\\.timeline" . timeline-mode))
 
 (provide 'timeline-mode)
+;;; timeline-mode.el ends here

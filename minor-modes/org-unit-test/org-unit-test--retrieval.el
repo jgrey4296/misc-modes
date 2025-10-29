@@ -1,3 +1,4 @@
+;; test-retrieval.el -*- mode: elisp; lexical-binding: t; -*-
 
 ;; Test retrieval
 
@@ -26,3 +27,6 @@
                )
       nil
       )))
+
+(provide 'org-unit-test--retrieval)
+;;; test-retrieval.el ends here

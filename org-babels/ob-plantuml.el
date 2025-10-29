@@ -87,3 +87,4 @@ This function is called by `org-babel-execute-src-block'."
   )
 
 (provide 'ob-plantuml)
+;;; ob-plantuml.el ends here

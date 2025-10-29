@@ -1125,3 +1125,5 @@ This function is assumed to be used as callback function for `hl-line-mode'."
       (setq pos (+ pos size)))
     (substring ruler 1) ))
 ;;-- end ruler
+
+;;; _hexl.el ends here

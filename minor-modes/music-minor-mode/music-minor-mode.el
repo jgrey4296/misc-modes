@@ -64,3 +64,4 @@
   )
 
 (provide 'music-minor-mode)
+;;; music-minor-mode.el ends here

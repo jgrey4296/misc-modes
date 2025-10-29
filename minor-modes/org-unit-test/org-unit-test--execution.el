@@ -1,3 +1,5 @@
+;; test-execution.el -*- mode: elisp; lexical-binding: t; -*-
+
 ;; Test Execution
 
 (defun org-unit-test-forward-to (locator bound)
@@ -124,3 +126,6 @@
     (-contains? tags (org-unit-test-value test))
     )
   )
+
+(provide 'org-unit-test--execution)
+;;; test-execution.el ends here

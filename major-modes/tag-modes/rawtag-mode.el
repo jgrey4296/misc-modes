@@ -1,26 +1,4 @@
 ;; +rawtag-mode.el -*- lexical-binding: t; no-byte-compile: t; -*-;
-;;-- header
-;;
-;; Copyright (C) 2022 John Grey
-;;
-;; Author: John Grey <https://github.com/jgrey4296>
-;; Maintainer: John Grey <johngrey4296 at gmail.com>
-;; Created: October 17, 2022
-;; Modified: October 17, 2022
-;; Version: 0.0.1
-;; Keywords:
-;; Homepage: https://github.com/jgrey4296
-;; Package-Requires: ((emacs "24.3"))
-;; Package written on: ((emacs 28.2))
-;;
-;; This file is not part of GNU Emacs.
-;;
-;;; Commentary:
-;;
-;;
-;;
-;;; Code:
-
 (require 'evil)
 (require 'hydra)
 
@@ -260,4 +238,4 @@ Maybe add a substitution "
 ;;-- end mode-definition
 
 (provide 'rawtag-mode)
-;;; +rawtag-mode.el ends here
+;;; rawtag-mode.el ends here

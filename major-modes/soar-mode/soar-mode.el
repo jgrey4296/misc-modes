@@ -1,9 +1,6 @@
 ;;; soar-mode.el -*- lexical-binding: t; -*-
-;;-- imports
 (require 'soar-faces)
 (require 'soar-comint)
-
-;;-- end imports
 
 ;;-- vars
 
@@ -106,3 +103,4 @@
 (add-to-list 'auto-mode-alist '("\\.soar" . soar-mode))
 
 (provide 'soar-mode)
+;;; soar-mode.el ends here

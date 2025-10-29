@@ -235,6 +235,7 @@ formatted as a bar chart
   )
 
 (provide 'librarian-tag-helm)
+;;; librarian-tag-helm.el ends here
 ;; Local Variables:
 ;; read-symbol-shorthands: (
 ;; ("litm-" . "librarian--tag-helm-")

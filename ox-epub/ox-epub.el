@@ -1,3 +1,5 @@
+;; ox-epub.el -*- mode: elisp; lexical-binding: t; -*-
+
 ;; https://orgmode.org/worg/dev/org-export-reference.html
 ;; https://orgmode.org/worg/dev/org-element-api.html#attributes
 
@@ -115,4 +117,4 @@ produce code that uses these same face definitions."
 ;; generated-autoload-file: "org-loaddefs.el"
 ;; End:
 
-;;; ox-html.el ends here
+;;; ox-epub.el ends here

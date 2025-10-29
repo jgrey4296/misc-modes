@@ -1,3 +1,5 @@
+;; +funcs.el -*- mode: elisp; lexical-binding: t; -*-
+
 ;; General Functions
 (cl-defstruct overlay_control/overlay-struct regexp face bounds)
 
@@ -130,3 +132,5 @@
             )
           ) data)
   )
+
+;;; +funcs.el ends here

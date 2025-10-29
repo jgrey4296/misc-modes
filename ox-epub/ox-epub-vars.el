@@ -169,3 +169,4 @@ ignored."
 ;;;; Todos
 
 (provide 'ox-epub-vars)
+;;; ox-epub-vars.el ends here

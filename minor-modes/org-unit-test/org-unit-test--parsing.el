@@ -1,4 +1,6 @@
-; Test Parsing
+;; test-parsing.el -*- mode: elisp; lexical-binding: t; -*-
+
+;; Test Parsing
 
 (defun org-unit-test-parse-tests (data)
   ;; split text into tests by full stops, defined groups,
@@ -168,3 +170,6 @@
     (make-jg-org-test :type test-type :locator locator :value mention)
     )
   )
+
+(provide 'org-unit-test--parsing)
+;;; test-parsing.el ends here

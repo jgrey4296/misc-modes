@@ -1,3 +1,5 @@
+;; config.el -*- mode: elisp; lexical-binding: t; -*-
+
 (load! "+vars")
 
 (use-package! overlay-ctrl-minor-mode
@@ -49,3 +51,4 @@
           )
     )
   )
+;;; config.el ends here

@@ -1,15 +1,7 @@
 ;;; subfile-mode.el -*- lexical-binding: t; no-byte-compile: t; -*-
-;;-- header
-;; File Commentary:
-;;
-;;
-;;-- end header
-
-;;-- imports
 (eval-when-compile
   (require 'rx)
   )
-;;-- end imports
 
 ;;-- keymap
 
@@ -102,21 +94,4 @@
 ;;-- end mode definition
 
 (provide 'subfile-mode)
-
-;;-- footer
-;; Copyright (C) 2024 john
-;;
-;; Author: john <https://github.com/jgrey4296>
-;; Maintainer: john <john@john-UM700>
-;; Created: November 21, 2024
-;; Modified: November 21, 2024
-;; Version: 0.0.1
-;; Keywords:
-;; Homepage: https://github.com/jgrey4296
-;; Package-Requires: ((emacs "24.3"))
-;; Package written on: ((emacs 29.3))
-;;
-;; This file is not part of GNU Emacs.
-;;
-;;-- end footer
 ;;; subfile-mode.el ends here

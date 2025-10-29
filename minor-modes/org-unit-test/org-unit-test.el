@@ -1,11 +1,12 @@
+;; org-unit-test.el -*- mode: elisp; lexical-binding: t; -*-
 
 (require 'evil)
 (require 'parsec)
 
-(require 'test-execution)
-(require 'test-parsing)
-(require 'test-reporting)
-(require 'test-retrieval)
+(require 'org-unit-test--execution)
+(require 'org-unit-test--parsing)
+(require 'org-unit-test--reporting)
+(require 'org-unit-test--retrieval)
 
 ;;
 ;; Functions to enable unit testing an org file
@@ -70,3 +71,5 @@
   )
 
 ;; TODO piggyback on org-export's tree walking
+
+;;; org-unit-test.el ends here

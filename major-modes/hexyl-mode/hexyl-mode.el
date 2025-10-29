@@ -1,21 +1,4 @@
 ;;; hexyl-mode.el -*- lexical-binding: t; no-byte-compile: t; -*-
-;;-- header
-;;
-;; Copyright (C) 2023 John Grey
-;;
-;; Author: John Grey <https://github.com/jgrey4296>
-;; Maintainer: John Grey <johngrey4296 at gmail.com>
-;; Created: March 02, 2023
-;; Modified: March 02, 2023
-;; Version: 0.0.1
-;; Keywords:
-;; Homepage: https://github.com/jgrey4296
-;; Package-Requires: ((emacs "24.3"))
-;; Package written on: ((emacs 28.2))
-;;
-;; This file is not part of GNU Emacs.
-;;
-;;; Commentary:
 ;; An... extension of the built-in emacs hexl mode,
 ;; for use with hexyl instead.
 ;;
@@ -86,29 +69,6 @@
 ;;  -h, --help                Print help information
 
 ;;  -V, --version             Print version information
-;; The original hexl commentary:
-;;
-;; Copyright (C) 1989, 1994, 1998, 2001-2022 Free Software Foundation, Inc.
-;; Author: Keith Gabryelski <ag@wheaties.ai.mit.edu>
-;; Maintainer: emacs-devel@gnu.org
-;; Keywords: data
-;; This package implements a major mode for editing binary files.  It uses
-;; a program called hexl, supplied with the GNU Emacs distribution, that
-;; can filter a binary into an editable format or from the format back into
-;; binary.  For full instructions, invoke `hexl-mode' on an empty buffer and
-;; do M-x `describe-mode'.
-;;
-;; NOTE: Remember to change `hexl-program' or `hexl-options' if needed.
-;;
-;; Currently hexl only supports big endian hex output with 16 bit
-;; grouping.
-;;
-;; -iso in `hexl-options' will allow iso characters to display in the
-;; ASCII region of the screen (if your Emacs supports this) instead of
-;; changing them to dots.
-;;; Code:
-
-;;-- end header
 
 (defvar hexyl-args '()
   "Arguments passed to the hexyl call"

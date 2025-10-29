@@ -1,37 +1,4 @@
 ;;; ob-clingo.el --- org-babel functions for prolog evaluation.
-
-;; Author: John Grey <https://github.com/jgrey4296>
-;; Maintainer: John Grey <johngrey4296 at gmail.com>
-;; Created: July 20, 2022
-;; Modified: July 20, 2022
-;; Version: 0.0.1
-;; Keywords:
-;; Homepage: https://github.com/jgrey4296
-;; Package-Requires: ((emacs "24.3"))
-;; Package written on: ((emacs 28.1))
-;;
-;; Adapted from:
-;; URL: https://github.com/ljos/ob-prolog
-
-;; This file is NOT part of GNU Emacs.
-
-;; This program is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
-;;
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-;;
-;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
-
-;;; Commentary:
-
 ;; Org-babel support for clingo.
 ;;
 ;; To activate ob-clingo add the following to your init.el file:

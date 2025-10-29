@@ -1,3 +1,5 @@
+;; test-reporting.el -*- mode: elisp; lexical-binding: t; -*-
+
 ;; Test Reporting
 
 (defun org-unit-test-print-results (results)
@@ -24,3 +26,6 @@
     (mapc (lambda (x) (princ (s-concat "    " (if (cdr x) "✓" "X") " : " (car x) "\n"))) (org-unit-test-results-results testgroup))
     )
   )
+
+(provide 'org-unit-test--reporting)
+;;; test-reporting.el ends here

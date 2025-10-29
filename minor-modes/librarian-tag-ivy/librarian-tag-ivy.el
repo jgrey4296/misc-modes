@@ -109,6 +109,7 @@
                    ))
 
 (provide 'librarian-tag-ivy)
+;;; librarian-tag-ivy.el ends here
 ;; Local Variables:
 ;; read-symbol-shorthands: (
 ;; ("liti-" . "librarian-tag-ivy-")

@@ -62,3 +62,4 @@
 (add-to-list 'auto-mode-alist '("/crontab\\..+" . cron-mode))
 
 (provide 'cron-mode)
+;;; cron-mode.el ends here
